@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimized Image Gallery Viewer</title>
+    <title>Image Gallery Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #e0e0e0;
+            overflow-x: hidden;
         }
 
         .gallery-container {
@@ -17,34 +18,30 @@
             margin: 0 auto;
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
 
         .gallery-item {
             position: relative;
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 12px;
             background: #f7f7f7;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
         .gallery-item img {
             width: 100%;
-            height: 100%;
+            height: 250px;
             object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-
-        .gallery-item img.loaded {
-            opacity: 1;
-        }
-
-        .gallery-item:hover img {
-            transform: scale(1.1);
+            transition: transform 0.3s ease-in-out;
         }
 
         .modal {
@@ -54,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -62,56 +59,77 @@
         }
 
         .modal img {
-            max-width: 90%;
-            max-height: 80%;
+            max-width: 95%;
+            max-height: 85%;
+            object-fit: contain;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-controls {
             position: absolute;
             bottom: 20px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
         }
 
         .modal-controls button {
             background: #4d4d4d;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 10px 20px;
             cursor: pointer;
             border-radius: 5px;
+            transition: background 0.3s ease;
         }
 
         .modal-controls button:hover {
-            background: #222;
+            background: #333;
         }
 
         .nav-arrow {
             position: absolute;
             top: 50%;
-            font-size: 2rem;
-            color: white;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: rgba(255,255,255,0.7);
             cursor: pointer;
             user-select: none;
+            transition: color 0.3s ease;
+            background: rgba(0,0,0,0.3);
             padding: 10px;
-            transition: color 0.2s;
         }
 
         .nav-arrow:hover {
-            color: #ccc;
+            color: white;
+            background: rgba(0,0,0,0.5);
         }
 
         .nav-arrow.left {
-            left: 20px;
+            left: 10px;
         }
 
         .nav-arrow.right {
-            right: 20px;
+            right: 10px;
         }
 
         @media (max-width: 600px) {
             .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .gallery-item img {
+                height: 200px;
+            }
+
+            .nav-arrow {
+                font-size: 2rem;
             }
         }
     </style>
@@ -145,15 +163,17 @@
             const img = new Image();
             img.src = `${i}.png`;
             img.alt = `Image ${i}`;
-            img.loading = "lazy"; // Lazy loading
-            img.onerror = () => { img.src = 'placeholder.png'; }; // Fallback for missing images
-            img.onload = () => { img.classList.add('loaded'); }; // Fade-in effect
+            
+            // Improved error handling with a data URI placeholder
+            img.onerror = () => { 
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
+            };
 
             const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
             wrapper.appendChild(img);
             wrapper.addEventListener('click', () => openModal(i - 1));
-
+            
             fragment.appendChild(wrapper);
             images.push(img.src);
         }
@@ -194,238 +214,29 @@
         nextButton.addEventListener('click', () => navigate(1));
         closeButton.addEventListener('click', closeModal);
 
+        // Enhanced keyboard navigation
         window.addEventListener('keydown', (e) => {
             if (modal.style.display === 'flex') {
-                if (e.key === 'ArrowLeft') navigate(-1);
-                if (e.key === 'ArrowRight') navigate(1);
-                if (e.key === 'Escape') closeModal();
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        navigate(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigate(1);
+                        break;
+                    case 'Escape':
+                        closeModal();
+                        break;
+                }
             }
         });
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* General Styles */
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
 
-        header {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        /* Gallery Styles */
-        .gallery-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-
-        .gallery-item {
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .gallery-item img:hover {
-            transform: scale(1.1);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .modal.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal img {
-            max-width: 90%;
-            max-height: 80%;
-        }
-
-        .modal-controls {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .modal-controls button {
-            background: linear-gradient(90deg, #4d4d4d, #6d6d6d);
-            border: 1px solid #fff;
-            color: white;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .modal-controls button:hover {
-            background: linear-gradient(90deg, #222, #444);
-            color: #ffcc00;
-        }
-
-        /* Spinner */
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Light/Dark Mode */
-        body.dark {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-
-        body.dark .gallery-item {
-            background: #1f1f1f;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        body.dark .modal {
-            background: rgba(0, 0, 0, 0.9);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 400px) {
-            .gallery-item img {
-                height: 150px;
+        // Close modal when clicking outside the image
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
             }
-            .modal img {
-                max-width: 80%;
-                max-height: 70%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>Image Gallery Viewer</header>
-
-    <div style="text-align: center; margin: 20px;">
-        <button onclick="setLayout('grid')" style="padding: 10px;">Grid View</button>
-        <button onclick="setLayout('list')" style="padding: 10px;">List View</button>
-        <button id="themeToggle" style="padding: 10px;">Toggle Dark Mode</button>
-    </div>
-
-    <div class="gallery-container" id="galleryContainer">
-        <!-- Images will be dynamically loaded -->
-    </div>
-
-    <div class="modal" id="modal">
-        <div class="modal-controls">
-            <button onclick="prevImage()">Prev</button>
-            <button onclick="closeModal()">Close</button>
-            <button onclick="nextImage()">Next</button>
-        </div>
-        <img src="" alt="Modal Image" id="modalImage">
-    </div>
-
-    <script>
-        const images = [
-            'https://via.placeholder.com/400x300?text=Image+1',
-            'https://via.placeholder.com/400x300?text=Image+2',
-            'https://via.placeholder.com/400x300?text=Image+3',
-            'https://via.placeholder.com/400x300?text=Image+4'
-        ];
-
-        const galleryContainer = document.getElementById('galleryContainer');
-        const modal = document.getElementById('modal');
-        const modalImage = document.getElementById('modalImage');
-        let currentIndex = 0;
-
-        images.forEach((src, index) => {
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('gallery-item');
-
-            const img = document.createElement('img');
-            img.src = src;
-            img.alt = `Image ${index + 1}`;
-            wrapper.appendChild(img);
-
-            wrapper.addEventListener('click', () => openModal(index));
-            galleryContainer.appendChild(wrapper);
         });
-
-        function openModal(index) {
-            currentIndex = index;
-            modalImage.src = images[index];
-            modal.classList.add('show');
-        }
-
-        function closeModal() {
-            modal.classList.remove('show');
-        }
-
-        function prevImage() {
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            modalImage.src = images[currentIndex];
-        }
-
-        function nextImage() {
-            currentIndex = (currentIndex + 1) % images.length;
-            modalImage.src = images[currentIndex];
-        }
-
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-        });
-
-        function setLayout(layout) {
-            galleryContainer.className = layout === 'grid' ? 'gallery-container' : 'gallery-container list-view';
-        }
     </script>
 </body>
 </html>
