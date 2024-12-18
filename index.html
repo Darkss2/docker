@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery Viewer</title>
+    <title>Optimized Image Gallery Viewer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,7 +35,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease-in-out;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .gallery-item img.loaded {
+            opacity: 1;
         }
 
         .gallery-item:hover img {
@@ -59,7 +64,6 @@
         .modal img {
             max-width: 90%;
             max-height: 80%;
-            margin: auto;
         }
 
         .modal-controls {
@@ -135,18 +139,26 @@
         const downloadButton = document.getElementById('download');
 
         const images = [];
-        for (let i = 1; i <= 97; i++) {  // Adjusted range to 97
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 1; i <= 97; i++) {
             const img = new Image();
             img.src = `${i}.png`;
             img.alt = `Image ${i}`;
-            img.onerror = () => { img.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' };
+            img.loading = "lazy"; // Lazy loading
+            img.onerror = () => { img.src = 'placeholder.png'; }; // Fallback for missing images
+            img.onload = () => { img.classList.add('loaded'); }; // Fade-in effect
+
             const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
             wrapper.appendChild(img);
             wrapper.addEventListener('click', () => openModal(i - 1));
-            galleryContainer.appendChild(wrapper);
+
+            fragment.appendChild(wrapper);
             images.push(img.src);
         }
+
+        galleryContainer.appendChild(fragment);
 
         let currentIndex = 0;
 
@@ -165,10 +177,10 @@
             downloadButton.onclick = () => {
                 const link = document.createElement('a');
                 link.href = images[currentIndex];
-                link.download = `image_${currentIndex + 1}.png`; // Set the file name
-                document.body.appendChild(link); // Append the link to the DOM
-                link.click(); // Programmatically click the link to trigger the download
-                document.body.removeChild(link); // Remove the link after the download is triggered
+                link.download = `image_${currentIndex + 1}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             };
         }
 
