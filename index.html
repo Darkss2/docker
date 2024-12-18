@@ -3,50 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimized Image Gallery Viewer</title>
+    <title>Image Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #e0e0e0;
+            background-color: #f4f4f4;
+            color: #333;
         }
 
+        header {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Gallery Styles */
         .gallery-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
+            padding: 20px;
         }
 
         .gallery-item {
             position: relative;
             overflow: hidden;
-            border-radius: 8px;
-            background: #f7f7f7;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease-in-out;
         }
 
         .gallery-item img {
             width: 100%;
-            height: 100%;
+            height: 200px;
             object-fit: cover;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transition: transform 0.3s;
         }
 
-        .gallery-item img.loaded {
-            opacity: 1;
-        }
-
-        .gallery-item:hover img {
+        .gallery-item img:hover {
             transform: scale(1.1);
         }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -58,7 +62,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
         }
 
         .modal img {
@@ -68,139 +78,148 @@
 
         .modal-controls {
             position: absolute;
-            bottom: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
         }
 
         .modal-controls button {
-            background: #4d4d4d;
+            background: linear-gradient(90deg, #4d4d4d, #6d6d6d);
+            border: 1px solid #fff;
             color: white;
-            border: none;
-            padding: 10px;
+            padding: 10px 20px;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 5px;
         }
 
         .modal-controls button:hover {
-            background: #222;
+            background: linear-gradient(90deg, #222, #444);
+            color: #ffcc00;
         }
 
-        .nav-arrow {
+        /* Spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
             position: absolute;
             top: 50%;
-            font-size: 2rem;
-            color: white;
-            cursor: pointer;
-            user-select: none;
-            padding: 10px;
-            transition: color 0.2s;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
-        .nav-arrow:hover {
-            color: #ccc;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .nav-arrow.left {
-            left: 20px;
+        /* Light/Dark Mode */
+        body.dark {
+            background-color: #121212;
+            color: #e0e0e0;
         }
 
-        .nav-arrow.right {
-            right: 20px;
+        body.dark .gallery-item {
+            background: #1f1f1f;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
-        @media (max-width: 600px) {
-            .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        body.dark .modal {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 400px) {
+            .gallery-item img {
+                height: 150px;
+            }
+            .modal img {
+                max-width: 80%;
+                max-height: 70%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="gallery-container" id="gallery"></div>
+    <header>Image Gallery Viewer</header>
+
+    <div style="text-align: center; margin: 20px;">
+        <button onclick="setLayout('grid')" style="padding: 10px;">Grid View</button>
+        <button onclick="setLayout('list')" style="padding: 10px;">List View</button>
+        <button id="themeToggle" style="padding: 10px;">Toggle Dark Mode</button>
+    </div>
+
+    <div class="gallery-container" id="galleryContainer">
+        <!-- Images will be dynamically loaded -->
+    </div>
 
     <div class="modal" id="modal">
-        <span class="nav-arrow left" id="prev">&#9664;</span>
-        <img id="modalImage" src="" alt="Zoomed Image">
-        <span class="nav-arrow right" id="next">&#9654;</span>
         <div class="modal-controls">
-            <button id="download">Download</button>
-            <button id="close">Close</button>
+            <button onclick="prevImage()">Prev</button>
+            <button onclick="closeModal()">Close</button>
+            <button onclick="nextImage()">Next</button>
         </div>
+        <img src="" alt="Modal Image" id="modalImage">
     </div>
 
     <script>
-        const galleryContainer = document.getElementById('gallery');
+        const images = [
+            'https://via.placeholder.com/400x300?text=Image+1',
+            'https://via.placeholder.com/400x300?text=Image+2',
+            'https://via.placeholder.com/400x300?text=Image+3',
+            'https://via.placeholder.com/400x300?text=Image+4'
+        ];
+
+        const galleryContainer = document.getElementById('galleryContainer');
         const modal = document.getElementById('modal');
         const modalImage = document.getElementById('modalImage');
-        const prevButton = document.getElementById('prev');
-        const nextButton = document.getElementById('next');
-        const closeButton = document.getElementById('close');
-        const downloadButton = document.getElementById('download');
+        let currentIndex = 0;
 
-        const images = [];
-        const fragment = document.createDocumentFragment();
-
-        for (let i = 1; i <= 97; i++) {
-            const img = new Image();
-            img.src = `${i}.png`;
-            img.alt = `Image ${i}`;
-            img.loading = "lazy"; // Lazy loading
-            img.onerror = () => { img.src = 'placeholder.png'; }; // Fallback for missing images
-            img.onload = () => { img.classList.add('loaded'); }; // Fade-in effect
-
+        images.forEach((src, index) => {
             const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
+
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `Image ${index + 1}`;
             wrapper.appendChild(img);
-            wrapper.addEventListener('click', () => openModal(i - 1));
 
-            fragment.appendChild(wrapper);
-            images.push(img.src);
-        }
-
-        galleryContainer.appendChild(fragment);
-
-        let currentIndex = 0;
+            wrapper.addEventListener('click', () => openModal(index));
+            galleryContainer.appendChild(wrapper);
+        });
 
         function openModal(index) {
             currentIndex = index;
             modalImage.src = images[index];
-            modal.style.display = 'flex';
-            updateDownloadLink();
+            modal.classList.add('show');
         }
 
         function closeModal() {
-            modal.style.display = 'none';
+            modal.classList.remove('show');
         }
 
-        function updateDownloadLink() {
-            downloadButton.onclick = () => {
-                const link = document.createElement('a');
-                link.href = images[currentIndex];
-                link.download = `image_${currentIndex + 1}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-        }
-
-        function navigate(offset) {
-            currentIndex = (currentIndex + offset + images.length) % images.length;
+        function prevImage() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
             modalImage.src = images[currentIndex];
-            updateDownloadLink();
         }
 
-        prevButton.addEventListener('click', () => navigate(-1));
-        nextButton.addEventListener('click', () => navigate(1));
-        closeButton.addEventListener('click', closeModal);
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            modalImage.src = images[currentIndex];
+        }
 
-        window.addEventListener('keydown', (e) => {
-            if (modal.style.display === 'flex') {
-                if (e.key === 'ArrowLeft') navigate(-1);
-                if (e.key === 'ArrowRight') navigate(1);
-                if (e.key === 'Escape') closeModal();
-            }
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
         });
+
+        function setLayout(layout) {
+            galleryContainer.className = layout === 'grid' ? 'gallery-container' : 'gallery-container list-view';
+        }
     </script>
 </body>
 </html>
