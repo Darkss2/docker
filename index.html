@@ -132,10 +132,30 @@
                 font-size: 2rem;
             }
         }
+
+        .instagram-link {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .instagram-link a {
+            text-decoration: none;
+            color: #4d4d4d;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .instagram-link a:hover {
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <div class="gallery-container" id="gallery"></div>
+
+    <div class="instagram-link">
+        <a href="https://www.instagram.com/yourusername" target="_blank">Follow me on Instagram</a>
+    </div>
 
     <div class="modal" id="modal">
         <span class="nav-arrow left" id="prev">&#9664;</span>
@@ -159,7 +179,7 @@
         const images = [];
         const fragment = document.createDocumentFragment();
 
-        for (let i = 1; i <= 97; i++) {
+        for (let i = 1; i <= 100; i++) { // Increased to 100 for more images
             const img = new Image();
             img.src = `${i}.png`;
             img.alt = `Image ${i}`;
