@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery Viewer</title>
+    <title>Creative Image Gallery</title>
     <style>
         :root {
             --gap: 20px;
@@ -13,51 +13,60 @@
             --hover-color: #333;
             --modal-bg: rgba(0, 0, 0, 0.9);
             --nav-color: rgba(255,255,255,0.7);
+            --transition-duration: 0.4s;
+            --border-radius: 15px;
+            --accent-color: #007bff; /* Example accent color */
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #e0e0e0;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Ensure the footer stays at the bottom */
+            min-height: 100vh;
+            color: var(--text-color);
         }
 
         .gallery-container {
             max-width: 1400px;
-            margin: 20px auto; /* Added vertical margin */
+            margin: 40px auto; /* Increased margin */
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Increased min size */
             gap: var(--gap);
-            flex: 1; /* Allows the gallery to grow */
+            flex: 1;
         }
 
         .gallery-item {
             position: relative;
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             background: var(--card-bg);
-            box-shadow: 0 6px 12px var(--shadow-color);
+            box-shadow: 0 8px 16px var(--shadow-color); /* Increased shadow */
             cursor: pointer;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform var(--transition-duration) ease-in-out, box-shadow var(--transition-duration) ease-in-out;
+            transform-origin: center; /* Smooth scaling */
         }
 
-       .gallery-item:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* Increased shadow on hover */
         }
 
         .gallery-item img {
             width: 100%;
-            height: 170px;
+            height: 200px; /* Increased height */
             object-fit: cover;
-           
+            transition: opacity var(--transition-duration) ease-in-out;
         }
 
+        .gallery-item img.loading {
+            opacity: 0.6;
+            filter: grayscale(100%); /* Visual loading effect */
+        }
 
         .modal {
             display: none;
@@ -71,7 +80,7 @@
             align-items: center;
             z-index: 1000;
             overflow: hidden;
-            transition: opacity 0.3s ease;
+            transition: opacity var(--transition-duration) ease;
             opacity: 0;
         }
 
@@ -80,21 +89,23 @@
             opacity: 1;
         }
 
-         .modal img {
-            max-width: 95%;
-            max-height: 85%;
+        .modal img {
+            max-width: 90%; /* Slightly reduced max width */
+            max-height: 80%; /* Slightly reduced max height */
             object-fit: contain;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn var(--transition-duration) ease-in-out;
+            border-radius: var(--border-radius); /* Rounded corners */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Shadow on modal image */
         }
 
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
-         .modal-controls {
+
+        .modal-controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px; /* Increased bottom spacing */
             display: flex;
             gap: 15px;
             justify-content: center;
@@ -102,208 +113,236 @@
         }
 
         .modal-controls button {
-            background: var(--text-color);
+            background: var(--accent-color); /* Use accent color */
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px; /* Increased padding */
             cursor: pointer;
-            border-radius: 5px;
-            transition: background 0.3s ease;
+            border-radius: 8px; /* Rounded corners */
+            transition: background var(--transition-duration) ease;
+            font-weight: bold;
         }
 
         .modal-controls button:hover {
-            background: var(--hover-color);
+            background: darken(var(--accent-color), 10%); /* Darken on hover */
         }
 
-         .nav-arrow {
+        .nav-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 2.5rem;
+            font-size: 3rem; /* Increased font size */
             color: var(--nav-color);
             cursor: pointer;
             user-select: none;
-            transition: color 0.3s ease;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
+            transition: color var(--transition-duration) ease, background var(--transition-duration) ease;
+            background: rgba(0,0,0,0.2); /* Reduced background opacity */
+            padding: 12px; /* Increased padding */
             border-radius: 50%;
         }
 
         .nav-arrow:hover {
             color: white;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4); /* Increased background opacity on hover */
         }
 
         .nav-arrow.left {
-            left: 10px;
+            left: 20px; /* Increased spacing */
         }
 
         .nav-arrow.right {
-            right: 10px;
+            right: 20px; /* Increased spacing */
         }
 
-        .nav-arrow::before{
-           font-family: 'Font Awesome 6 Free';
-           font-weight: 900;
+        .nav-arrow::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
         }
 
-       .nav-arrow.left::before{
-         content: "\f053";
+        .nav-arrow.left::before {
+            content: "\f053";
         }
 
-       .nav-arrow.right::before{
-         content: "\f054";
+        .nav-arrow.right::before {
+            content: "\f054";
         }
 
-
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                padding: 10px;
-                gap: 10px;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                padding: 15px;
+                gap: 15px;
             }
 
             .gallery-item img {
-                height: 130px;
+                height: 150px;
             }
 
             .nav-arrow {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
         }
 
-
         .instagram-link {
             text-align: center;
-            margin: 20px 0;
+            margin: 30px 0; /* Increased margin */
         }
 
         .instagram-link a {
             text-decoration: none;
-            color: var(--text-color);
+            color: var(--accent-color);
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.3rem; /* Increased font size */
+            transition: color var(--transition-duration) ease;
         }
 
-         .instagram-link a:hover {
-            color: var(--hover-color);
+        .instagram-link a:hover {
+            color: darken(var(--accent-color), 15%); /* Darken on hover */
         }
 
-        footer{
-          text-align: center;
-          padding: 10px;
-          background-color: var(--card-bg);
-          color: var(--text-color);
+        footer {
+            text-align: center;
+            padding: 15px; /* Increased padding */
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </head>
 <body>
-    <div class="gallery-container" id="gallery"></div>
-    
-    <div class="instagram-link">
-        <a href="https://www.instagram.com/khn_clothing/" target="_blank">Follow me on Instagram</a>
+<div class="gallery-container" id="gallery"></div>
+
+<div class="instagram-link">
+    <a href="https://www.instagram.com/khn_clothing/" target="_blank">Follow me on Instagram</a>
+</div>
+
+<div class="modal" id="modal">
+    <span class="nav-arrow left" id="prev"></span>
+    <img id="modalImage" src="" alt="Zoomed Image">
+    <span class="nav-arrow right" id="next"></span>
+    <div class="modal-controls">
+        <button id="download">Download</button>
+        <button id="close">Close</button>
     </div>
+</div>
 
-    <div class="modal" id="modal">
-        <span class="nav-arrow left" id="prev"></span>
-        <img id="modalImage" src="" alt="Zoomed Image">
-        <span class="nav-arrow right" id="next"></span>
-        <div class="modal-controls">
-            <button id="download">Download</button>
-            <button id="close">Close</button>
-        </div>
-    </div>
+<footer>
+    © 2024 Image Gallery
+</footer>
 
-    <footer>
-       © 2024 Image Gallery
-    </footer>
+<script>
+    const galleryContainer = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+    const prevButton = document.getElementById('prev');
+    const nextButton = document.getElementById('next');
+    const closeButton = document.getElementById('close');
+    const downloadButton = document.getElementById('download');
 
-    <script>
-        const galleryContainer = document.getElementById('gallery');
-        const modal = document.getElementById('modal');
-        const modalImage = document.getElementById('modalImage');
-        const prevButton = document.getElementById('prev');
-        const nextButton = document.getElementById('next');
-        const closeButton = document.getElementById('close');
-        const downloadButton = document.getElementById('download');
+    const images = [];
+    const fragment = document.createDocumentFragment();
+    const imageCount = 145;
 
-        const images = [];
-        const fragment = document.createDocumentFragment();
-
-        for (let i = 1; i <= 145; i++) {  // Increased to 150 images
-           const wrapper = document.createElement('div');
-            wrapper.classList.add('gallery-item');
-
+    function loadImage(index) {
+        return new Promise((resolve, reject) => {
             const img = new Image();
-            img.src = `${i}.png`;
-            img.alt = `Image ${i}`;
-             img.onerror = () => { 
-                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
-            };
-            wrapper.appendChild(img);
-             wrapper.addEventListener('click', () => openModal(i - 1));
-            fragment.appendChild(wrapper);
-            images.push(img.src);
-        }
+            img.src = `${index + 1}.png`;
+            img.alt = `Image ${index + 1}`;
+            img.classList.add('loading');
 
+            img.onload = () => {
+                img.classList.remove('loading');
+                resolve(img);
+            };
+
+            img.onerror = () => {
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                img.classList.remove('loading');
+                resolve(img);
+            };
+        });
+    }
+
+
+    async function createGalleryItem(index) {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('gallery-item');
+
+        const img = await loadImage(index);
+        wrapper.appendChild(img);
+        wrapper.addEventListener('click', () => openModal(index));
+        images.push(img.src);
+        return wrapper;
+    }
+
+    async function initGallery() {
+        for (let i = 0; i < imageCount; i++) {
+            const galleryItem = await createGalleryItem(i);
+            fragment.appendChild(galleryItem);
+        }
         galleryContainer.appendChild(fragment);
+    }
 
-        let currentIndex = 0;
+    initGallery();
 
-        function openModal(index) {
-            currentIndex = index;
-            modalImage.src = images[index];
-            modal.classList.add('active');
-            updateDownloadLink();
-        }
+    let currentIndex = 0;
 
-        function closeModal() {
-            modal.classList.remove('active');
-        }
+    function openModal(index) {
+        currentIndex = index;
+        modalImage.src = images[index];
+        modal.classList.add('active');
+        updateDownloadLink();
+    }
 
-        function updateDownloadLink() {
-            downloadButton.onclick = () => {
-                const link = document.createElement('a');
-                link.href = images[currentIndex];
-                link.download = `image_${currentIndex + 1}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-        }
+    function closeModal() {
+        modal.classList.remove('active');
+    }
 
-        function navigate(offset) {
-            currentIndex = (currentIndex + offset + images.length) % images.length;
-            modalImage.src = images[currentIndex];
-            updateDownloadLink();
-        }
+    function updateDownloadLink() {
+        downloadButton.onclick = () => {
+            const link = document.createElement('a');
+            link.href = images[currentIndex];
+            link.download = `image_${currentIndex + 1}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    }
 
-        prevButton.addEventListener('click', () => navigate(-1));
-        nextButton.addEventListener('click', () => navigate(1));
-        closeButton.addEventListener('click', closeModal);
+    function navigate(offset) {
+        currentIndex = (currentIndex + offset + images.length) % images.length;
+        modalImage.src = images[currentIndex];
+        updateDownloadLink();
+    }
 
-        window.addEventListener('keydown', (e) => {
-            if (modal.classList.contains('active')) {
-                switch(e.key) {
-                    case 'ArrowLeft':
-                        navigate(-1);
-                        break;
-                    case 'ArrowRight':
-                        navigate(1);
-                        break;
-                    case 'Escape':
-                        closeModal();
-                        break;
-                }
+    prevButton.addEventListener('click', () => navigate(-1));
+    nextButton.addEventListener('click', () => navigate(1));
+    closeButton.addEventListener('click', closeModal);
+
+    window.addEventListener('keydown', (e) => {
+        if (modal.classList.contains('active')) {
+            switch (e.key) {
+                case 'ArrowLeft':
+                    navigate(-1);
+                    break;
+                case 'ArrowRight':
+                    navigate(1);
+                    break;
+                case 'Escape':
+                    closeModal();
+                    break;
             }
-        });
+        }
+    });
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    </script>
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+</script>
 </body>
 </html>
