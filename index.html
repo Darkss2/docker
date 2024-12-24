@@ -5,12 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery Viewer</title>
     <style>
+        :root {
+            --gap: 15px;
+            --card-bg: #f7f7f7;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-color: #4d4d4d;
+            --hover-color: #333;
+            --modal-bg: rgba(0, 0, 0, 0.9);
+            --nav-color: rgba(255,255,255,0.7);
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #e0e0e0;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure the footer stays at the bottom */
         }
 
         .gallery-container {
@@ -19,20 +32,23 @@
             padding: 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: var(--gap);
+            flex: 1; /* Allows the gallery to grow */
         }
 
         .gallery-item {
             position: relative;
             overflow: hidden;
             border-radius: 12px;
-            background: #f7f7f7;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg);
+            box-shadow: 0 6px 12px var(--shadow-color);
             cursor: pointer;
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
         }
 
-        .gallery-item:hover {
+         .gallery-item:hover {
             transform: scale(1.05);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
@@ -44,6 +60,67 @@
             transition: transform 0.3s ease-in-out;
         }
 
+        .gallery-item .image-loading {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+
+        .gallery-item .image-loading::before {
+            content: '';
+            box-sizing: border-box;
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid transparent;
+            border-top-color: var(--text-color);
+            border-radius: 50%;
+            animation: spinner 0.7s linear infinite;
+        }
+
+        @keyframes spinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .gallery-item .image-error {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #888;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+
+        .gallery-item .image-error button {
+            background: none;
+            border: 1px solid var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            color: var(--text-color);
+            margin-top: 5px;
+        }
+
+
+        .image-caption {
+          padding: 10px;
+          text-align: center;
+          font-size: 0.9em;
+          color: var(--text-color);
+        }
+
+
         .modal {
             display: none;
             position: fixed;
@@ -51,12 +128,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: var(--modal-bg);
             justify-content: center;
             align-items: center;
             z-index: 1000;
             overflow: hidden;
+            transition: opacity 0.3s ease;
+            opacity: 0;
         }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
 
         .modal img {
             max-width: 95%;
@@ -70,7 +155,7 @@
             to { opacity: 1; }
         }
 
-        .modal-controls {
+         .modal-controls {
             position: absolute;
             bottom: 20px;
             display: flex;
@@ -80,7 +165,7 @@
         }
 
         .modal-controls button {
-            background: #4d4d4d;
+            background: var(--text-color);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -90,20 +175,21 @@
         }
 
         .modal-controls button:hover {
-            background: #333;
+            background: var(--hover-color);
         }
 
-        .nav-arrow {
+         .nav-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             font-size: 2.5rem;
-            color: rgba(255,255,255,0.7);
+            color: var(--nav-color);
             cursor: pointer;
             user-select: none;
             transition: color 0.3s ease;
             background: rgba(0,0,0,0.3);
             padding: 10px;
+            border-radius: 50%;
         }
 
         .nav-arrow:hover {
@@ -119,9 +205,25 @@
             right: 10px;
         }
 
+        .nav-arrow::before{
+           font-family: 'Font Awesome 6 Free';
+           font-weight: 900;
+        }
+
+       .nav-arrow.left::before{
+         content: "\f053";
+        }
+
+       .nav-arrow.right::before{
+         content: "\f054";
+        }
+
+
         @media (max-width: 600px) {
             .gallery-container {
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                padding: 10px;
+                gap: 10px;
             }
 
             .gallery-item img {
@@ -140,32 +242,46 @@
 
         .instagram-link a {
             text-decoration: none;
-            color: #4d4d4d;
+            color: var(--text-color);
             font-weight: bold;
             font-size: 1.2rem;
         }
 
-        .instagram-link a:hover {
-            color: #333;
+         .instagram-link a:hover {
+            color: var(--hover-color);
         }
+
+        footer{
+          text-align: center;
+          padding: 10px;
+          background-color: var(--card-bg);
+          color: var(--text-color);
+        }
+
+
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="gallery-container" id="gallery"></div>
-
+    
     <div class="instagram-link">
         <a href="https://www.instagram.com/khn_clothing/" target="_blank">Follow me on Instagram</a>
     </div>
 
     <div class="modal" id="modal">
-        <span class="nav-arrow left" id="prev">&#9664;</span>
+        <span class="nav-arrow left" id="prev"></span>
         <img id="modalImage" src="" alt="Zoomed Image">
-        <span class="nav-arrow right" id="next">&#9654;</span>
+        <span class="nav-arrow right" id="next"></span>
         <div class="modal-controls">
             <button id="download">Download</button>
             <button id="close">Close</button>
         </div>
     </div>
+
+    <footer>
+       © 2024 Image Gallery
+    </footer>
 
     <script>
         const galleryContainer = document.getElementById('gallery');
@@ -177,23 +293,78 @@
         const downloadButton = document.getElementById('download');
 
         const images = [];
+        const titles = [
+            "Abstract Art", "Mountain Landscape", "City at Night", "Forest Path", "Ocean Sunset",
+            "Starry Sky", "Desert Dunes", "Autumn Leaves", "Winter Scene", "Spring Flowers",
+            "Modern Architecture", "Vintage Car", "Urban Graffiti", "Tropical Beach", "Cloudscape",
+            "Sunrise Over Hills", "Lake Reflection", "Wildlife Portrait", "Food Art", "Botanical Detail",
+            "Geometric Patterns", "Music Festival", "Space Exploration", "Underwater World", "Street Art",
+            "Canyon View", "Waterfall Scene", "Historical Place", "Industrial Area", "Market Scene",
+            "Rainy Day", "Foggy Morning", "Rainbow Sky", "Aurora Borealis", "Volcano Eruption",
+            "Farming Field", "Snowy Peak", "Autumn Forest", "River Flow", "Coastal Town",
+            "Ancient Ruins", "Sculpture Art", "Night Market", "Ballet Performance", "Concert Crowd",
+            "Abstract Texture", "City Skyline", "Bird's Eye View", "Aerial Shot", "Road Trip",
+            "Camping Scene", "Hiking Trail", "Beach Party", "Cooking Session", "Gardening Time",
+            "Science Lab", "Library Shelf", "Art Studio", "Book Store", "Coffee Shop",
+            "Tea Ceremony", "Yoga Session", "Meditation Spot", "Music Room", "Dance Class",
+            "Fashion Show", "Photo Shoot", "Meeting Room", "Business Office", "Working Space",
+            "Coding Desk", "Crafting Table", "Travel Journal", "Personal Blog", "Home Decor",
+            "Pet Playtime", "Family Gathering", "Holiday Season", "Birthday Party", "Wedding Day",
+            "Baby Shower", "Graduation Ceremony", "Sports Game", "Gaming Setup", "Movie Night",
+             "Board Game", "Chess Game", "Puzzle Time", "Relaxing Bath", "Reading Nook",
+             "Writing Desk", "Painting Easel", "Drawing Pad", "Knitting Project", "Sewing Machine"
+        ];
+
+
         const fragment = document.createDocumentFragment();
 
-        for (let i = 1; i <= 100; i++) { // Increased to 100 for more images
-            const img = new Image();
-            img.src = `${i}.png`;
-            img.alt = `Image ${i}`;
-            
-            // Improved error handling with a data URI placeholder
-            img.onerror = () => { 
-                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
-            };
-
+        for (let i = 1; i <= 100; i++) {
             const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
-            wrapper.appendChild(img);
-            wrapper.addEventListener('click', () => openModal(i - 1));
             
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('image-loading');
+             wrapper.appendChild(loadingDiv);
+             
+
+             const img = new Image();
+            img.src = `${i}.png`;
+            img.alt = `Image ${i}`;
+
+            let errorDiv;
+            let hasError = false;
+
+
+            img.onload = () => {
+               if (hasError) return;
+                 loadingDiv.remove();
+                 wrapper.appendChild(img);
+            };
+
+            img.onerror = () => {
+                hasError = true;
+                 loadingDiv.remove();
+               
+                 errorDiv = document.createElement('div');
+                errorDiv.classList.add('image-error');
+                errorDiv.innerHTML = `Failed to load image. <br> <button>Retry</button>`;
+                wrapper.appendChild(errorDiv);
+
+
+                errorDiv.querySelector('button').onclick = () => {
+                   hasError = false;
+                   errorDiv.remove();
+                   wrapper.appendChild(loadingDiv);
+                   img.src = `${i}.png?r=${Math.random()}`;
+                };
+            };
+
+            const caption = document.createElement('div');
+            caption.classList.add('image-caption');
+            caption.textContent = titles[i - 1] || `Image ${i}`;
+            wrapper.appendChild(caption);
+            
+            wrapper.addEventListener('click', () => openModal(i - 1));
             fragment.appendChild(wrapper);
             images.push(img.src);
         }
@@ -205,12 +376,12 @@
         function openModal(index) {
             currentIndex = index;
             modalImage.src = images[index];
-            modal.style.display = 'flex';
+            modal.classList.add('active');
             updateDownloadLink();
         }
 
         function closeModal() {
-            modal.style.display = 'none';
+            modal.classList.remove('active');
         }
 
         function updateDownloadLink() {
@@ -234,9 +405,8 @@
         nextButton.addEventListener('click', () => navigate(1));
         closeButton.addEventListener('click', closeModal);
 
-        // Enhanced keyboard navigation
         window.addEventListener('keydown', (e) => {
-            if (modal.style.display === 'flex') {
+            if (modal.classList.contains('active')) {
                 switch(e.key) {
                     case 'ArrowLeft':
                         navigate(-1);
@@ -251,7 +421,6 @@
             }
         });
 
-        // Close modal when clicking outside the image
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal();
