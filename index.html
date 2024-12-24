@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery Viewer</title>
     <style>
-        :root {
-            --gap: 15px;
+       :root {
+            --gap: 20px;
             --card-bg: #f7f7f7;
             --shadow-color: rgba(0, 0, 0, 0.1);
             --text-color: #4d4d4d;
@@ -27,11 +27,11 @@
         }
 
         .gallery-container {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 1400px;
+            margin: 20px auto; /* Added vertical margin */
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: var(--gap);
             flex: 1; /* Allows the gallery to grow */
         }
@@ -43,81 +43,19 @@
             background: var(--card-bg);
             box-shadow: 0 6px 12px var(--shadow-color);
             cursor: pointer;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
 
-         .gallery-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+       .gallery-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
 
         .gallery-item img {
             width: 100%;
-            height: 250px;
+            height: 170px;
             object-fit: cover;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .gallery-item .image-loading {
-            width: 100%;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f0f0;
-            position: relative;
-        }
-
-        .gallery-item .image-loading::before {
-            content: '';
-            box-sizing: border-box;
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 4px solid transparent;
-            border-top-color: var(--text-color);
-            border-radius: 50%;
-            animation: spinner 0.7s linear infinite;
-        }
-
-        @keyframes spinner {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .gallery-item .image-error {
-            width: 100%;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f0f0;
-            color: #888;
-            text-align: center;
-            padding: 10px;
-            font-size: 0.9em;
-        }
-
-
-        .gallery-item .image-error button {
-            background: none;
-            border: 1px solid var(--text-color);
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            color: var(--text-color);
-            margin-top: 5px;
-        }
-
-
-        .image-caption {
-          padding: 10px;
-          text-align: center;
-          font-size: 0.9em;
-          color: var(--text-color);
+           
         }
 
 
@@ -142,8 +80,7 @@
             opacity: 1;
         }
 
-
-        .modal img {
+         .modal img {
             max-width: 95%;
             max-height: 85%;
             object-fit: contain;
@@ -154,7 +91,7 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
+        
          .modal-controls {
             position: absolute;
             bottom: 20px;
@@ -221,19 +158,20 @@
 
         @media (max-width: 600px) {
             .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 padding: 10px;
                 gap: 10px;
             }
 
             .gallery-item img {
-                height: 200px;
+                height: 130px;
             }
 
             .nav-arrow {
                 font-size: 2rem;
             }
         }
+
 
         .instagram-link {
             text-align: center;
@@ -257,8 +195,6 @@
           background-color: var(--card-bg);
           color: var(--text-color);
         }
-
-
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -293,78 +229,20 @@
         const downloadButton = document.getElementById('download');
 
         const images = [];
-        const titles = [
-            "Abstract Art", "Mountain Landscape", "City at Night", "Forest Path", "Ocean Sunset",
-            "Starry Sky", "Desert Dunes", "Autumn Leaves", "Winter Scene", "Spring Flowers",
-            "Modern Architecture", "Vintage Car", "Urban Graffiti", "Tropical Beach", "Cloudscape",
-            "Sunrise Over Hills", "Lake Reflection", "Wildlife Portrait", "Food Art", "Botanical Detail",
-            "Geometric Patterns", "Music Festival", "Space Exploration", "Underwater World", "Street Art",
-            "Canyon View", "Waterfall Scene", "Historical Place", "Industrial Area", "Market Scene",
-            "Rainy Day", "Foggy Morning", "Rainbow Sky", "Aurora Borealis", "Volcano Eruption",
-            "Farming Field", "Snowy Peak", "Autumn Forest", "River Flow", "Coastal Town",
-            "Ancient Ruins", "Sculpture Art", "Night Market", "Ballet Performance", "Concert Crowd",
-            "Abstract Texture", "City Skyline", "Bird's Eye View", "Aerial Shot", "Road Trip",
-            "Camping Scene", "Hiking Trail", "Beach Party", "Cooking Session", "Gardening Time",
-            "Science Lab", "Library Shelf", "Art Studio", "Book Store", "Coffee Shop",
-            "Tea Ceremony", "Yoga Session", "Meditation Spot", "Music Room", "Dance Class",
-            "Fashion Show", "Photo Shoot", "Meeting Room", "Business Office", "Working Space",
-            "Coding Desk", "Crafting Table", "Travel Journal", "Personal Blog", "Home Decor",
-            "Pet Playtime", "Family Gathering", "Holiday Season", "Birthday Party", "Wedding Day",
-            "Baby Shower", "Graduation Ceremony", "Sports Game", "Gaming Setup", "Movie Night",
-             "Board Game", "Chess Game", "Puzzle Time", "Relaxing Bath", "Reading Nook",
-             "Writing Desk", "Painting Easel", "Drawing Pad", "Knitting Project", "Sewing Machine"
-        ];
-
-
         const fragment = document.createDocumentFragment();
 
-        for (let i = 1; i <= 100; i++) {
-            const wrapper = document.createElement('div');
+        for (let i = 1; i <= 150; i++) {  // Increased to 150 images
+           const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
-            
-            const loadingDiv = document.createElement('div');
-            loadingDiv.classList.add('image-loading');
-             wrapper.appendChild(loadingDiv);
-             
 
-             const img = new Image();
+            const img = new Image();
             img.src = `${i}.png`;
             img.alt = `Image ${i}`;
-
-            let errorDiv;
-            let hasError = false;
-
-
-            img.onload = () => {
-               if (hasError) return;
-                 loadingDiv.remove();
-                 wrapper.appendChild(img);
+             img.onerror = () => { 
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
             };
-
-            img.onerror = () => {
-                hasError = true;
-                 loadingDiv.remove();
-               
-                 errorDiv = document.createElement('div');
-                errorDiv.classList.add('image-error');
-                errorDiv.innerHTML = `Failed to load image. <br> <button>Retry</button>`;
-                wrapper.appendChild(errorDiv);
-
-
-                errorDiv.querySelector('button').onclick = () => {
-                   hasError = false;
-                   errorDiv.remove();
-                   wrapper.appendChild(loadingDiv);
-                   img.src = `${i}.png?r=${Math.random()}`;
-                };
-            };
-
-            const caption = document.createElement('div');
-            caption.classList.add('image-caption');
-            caption.textContent = titles[i - 1] || `Image ${i}`;
-            wrapper.appendChild(caption);
-            
-            wrapper.addEventListener('click', () => openModal(i - 1));
+            wrapper.appendChild(img);
+             wrapper.addEventListener('click', () => openModal(i - 1));
             fragment.appendChild(wrapper);
             images.push(img.src);
         }
