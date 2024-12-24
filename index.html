@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery Viewer</title>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        :root {
+       :root {
             --gap: 20px;
             --card-bg: #f7f7f7;
             --shadow-color: rgba(0, 0, 0, 0.1);
@@ -21,10 +20,10 @@
             margin: 0;
             padding: 0;
             background-color: #e0e0e0;
-             overflow-x: hidden;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; 
+            min-height: 100vh; /* Ensure the footer stays at the bottom */
         }
 
         .gallery-container {
@@ -34,59 +33,29 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: var(--gap);
-            flex: 1;
+            flex: 1; /* Allows the gallery to grow */
         }
 
-       .gallery-item {
+        .gallery-item {
             position: relative;
-             overflow: hidden;
+            overflow: hidden;
             border-radius: 12px;
             background: var(--card-bg);
             box-shadow: 0 6px 12px var(--shadow-color);
             cursor: pointer;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-           
         }
 
-         .gallery-item:hover {
+       .gallery-item:hover {
             transform: scale(1.02);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
-        
+
         .gallery-item img {
             width: 100%;
-            height: 0; 
-            padding-bottom: 100%; 
+            height: 170px;
             object-fit: cover;
-            border-radius: 12px;
-        }
-
-        .gallery-item:nth-child(odd) {
-          animation: slideInLeft 0.7s ease forwards;
-        }
-          .gallery-item:nth-child(even) {
-          animation: slideInRight 0.7s ease forwards;
-        }
-
-        @keyframes slideInLeft {
-         from {
-           transform: translateX(-100px);
-             opacity: 0;
-         }
-          to {
-           transform: translateX(0);
-              opacity: 1;
-        }
-        }
-         @keyframes slideInRight {
-         from {
-           transform: translateX(100px);
-           opacity: 0;
-         }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+           
         }
 
 
@@ -111,19 +80,19 @@
             opacity: 1;
         }
 
-        .modal img {
+         .modal img {
             max-width: 95%;
             max-height: 85%;
             object-fit: contain;
-             animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-         @keyframes fadeIn {
+        @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         
-       .modal-controls {
+         .modal-controls {
             position: absolute;
             bottom: 20px;
             display: flex;
@@ -146,7 +115,7 @@
             background: var(--hover-color);
         }
 
-       .nav-arrow {
+         .nav-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -160,10 +129,11 @@
             border-radius: 50%;
         }
 
-       .nav-arrow:hover {
+        .nav-arrow:hover {
             color: white;
-             background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
         }
+
         .nav-arrow.left {
             left: 10px;
         }
@@ -171,7 +141,8 @@
         .nav-arrow.right {
             right: 10px;
         }
-          .nav-arrow::before{
+
+        .nav-arrow::before{
            font-family: 'Font Awesome 6 Free';
            font-weight: 900;
         }
@@ -183,25 +154,24 @@
        .nav-arrow.right::before{
          content: "\f054";
         }
+
+
         @media (max-width: 600px) {
             .gallery-container {
-                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 padding: 10px;
                 gap: 10px;
             }
 
-             .nav-arrow {
-                font-size: 2rem;
-            }
-              
-           .gallery-item {
-             border-radius: 8px;
+            .gallery-item img {
+                height: 130px;
             }
 
-         .gallery-item img {
-            border-radius: 8px;
-         }
+            .nav-arrow {
+                font-size: 2rem;
+            }
         }
+
 
         .instagram-link {
             text-align: center;
@@ -215,18 +185,18 @@
             font-size: 1.2rem;
         }
 
-        .instagram-link a:hover {
+         .instagram-link a:hover {
             color: var(--hover-color);
         }
 
-
-        footer {
+        footer{
           text-align: center;
           padding: 10px;
           background-color: var(--card-bg);
-           color: var(--text-color);
+          color: var(--text-color);
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="gallery-container" id="gallery"></div>
@@ -238,7 +208,7 @@
     <div class="modal" id="modal">
         <span class="nav-arrow left" id="prev"></span>
         <img id="modalImage" src="" alt="Zoomed Image">
-         <span class="nav-arrow right" id="next"></span>
+        <span class="nav-arrow right" id="next"></span>
         <div class="modal-controls">
             <button id="download">Download</button>
             <button id="close">Close</button>
@@ -246,7 +216,7 @@
     </div>
 
     <footer>
-        © 2024 Image Gallery
+       © 2024 Image Gallery
     </footer>
 
     <script>
@@ -261,20 +231,20 @@
         const images = [];
         const fragment = document.createDocumentFragment();
 
-        for (let i = 1; i <= 145; i++) { 
+        for (let i = 1; i <= 150; i++) {  // Increased to 150 images
            const wrapper = document.createElement('div');
             wrapper.classList.add('gallery-item');
 
             const img = new Image();
             img.src = `${i}.png`;
             img.alt = `Image ${i}`;
-            img.onerror = () => { 
+             img.onerror = () => { 
                 img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
             };
             wrapper.appendChild(img);
-            wrapper.addEventListener('click', () => openModal(i - 1));
+             wrapper.addEventListener('click', () => openModal(i - 1));
             fragment.appendChild(wrapper);
-             images.push(img.src);
+            images.push(img.src);
         }
 
         galleryContainer.appendChild(fragment);
@@ -292,7 +262,7 @@
             modal.classList.remove('active');
         }
 
-         function updateDownloadLink() {
+        function updateDownloadLink() {
             downloadButton.onclick = () => {
                 const link = document.createElement('a');
                 link.href = images[currentIndex];
@@ -313,7 +283,7 @@
         nextButton.addEventListener('click', () => navigate(1));
         closeButton.addEventListener('click', closeModal);
 
-          window.addEventListener('keydown', (e) => {
+        window.addEventListener('keydown', (e) => {
             if (modal.classList.contains('active')) {
                 switch(e.key) {
                     case 'ArrowLeft':
