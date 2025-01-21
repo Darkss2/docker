@@ -8,17 +8,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
+            --primary-bg: #f5f5f5;
+            --secondary-bg: #e0e0e0;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --highlight: rgba(135, 206, 235, 0.3);
+            --gradient: linear-gradient(45deg, rgba(135, 206, 235, 0.2), rgba(147, 112, 219, 0.2));
+        }
+
+        [data-theme="dark"] {
             --primary-bg: #1a1a1a;
-            --secondary-bg: #222;
-            --text-color: #fff;
-            --accent-color: #32CD32;
-            --hover-bg: rgba(255, 255, 255, 0.1);
+            --secondary-bg: #2d2d2d;
+            --card-bg: #333333;
+            --text-color: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --highlight: rgba(135, 206, 235, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         body {
@@ -29,72 +41,56 @@
             overflow-x: hidden;
         }
 
-        /* Navigation Bar */
-        .nav-bar {
+        /* Theme Toggle */
+        #theme-toggle {
             position: fixed;
-            top: 0;
-            right: 0;
-            padding: 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-btn {
+            top: 20px;
+            right: 20px;
             background: none;
-            border: 2px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 8px 15px;
-            border-radius: 20px;
+            border: none;
+            font-size: 24px;
             cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.7em;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            z-index: 1000;
+            color: var(--text-color);
         }
 
-        .social-btn:hover {
-            background: var(--accent-color);
-            color: var(--primary-bg);
-        }
-
-        .social-btn i {
-            font-size: 1.2em;
-        }
-
-        /* Header Section */
+        /* Header with Counter and Floating Images */
         .header {
-            height: 180px;
+            height: 300px;
             position: relative;
             overflow: hidden;
             background: var(--secondary-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
         }
 
         .counter-container {
-            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 2;
+            text-align: center;
         }
 
         .counter {
             font-family: 'Press Start 2P', cursive;
-            font-size: 3em;
-            color: white;
-            margin-bottom: 5px;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: inline-block;
         }
 
-        .designs-text {
+        .counter-text {
             font-family: 'Press Start 2P', cursive;
             font-size: 1em;
-            color: var(--accent-color);
             opacity: 0;
-            animation: fadeIn 1s ease forwards;
-            animation-delay: 3s;
+        }
+
+        .typing {
+            animation: typing 3s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
         }
 
         .floating-images {
@@ -103,26 +99,134 @@
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
         }
 
         .floating-image {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
-            border-radius: 50%;
-            animation: float 20s infinite linear;
-            opacity: 0.5;
+            border-radius: 10px;
+            animation: float 15s infinite linear;
+            opacity: 0.7;
         }
 
         @keyframes float {
             0% {
-                transform: translateX(-100%) translateY(var(--y));
+                transform: translateX(-100%) translateY(var(--y)) rotate(var(--rotate));
             }
             100% {
-                transform: translateX(100vw) translateY(var(--y));
+                transform: translateX(100vw) translateY(var(--y)) rotate(var(--rotate));
             }
+        }
+
+        /* Main Gallery */
+        .gallery-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: var(--card-bg);
+            box-shadow: 0 6px 12px var(--shadow);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: var(--gradient);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal img {
+            max-width: 95%;
+            max-height: 85%;
+            object-fit: contain;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .nav-arrow:hover {
+            background: rgba(0,0,0,0.5);
+            color: white;
+        }
+
+        .nav-arrow.left {
+            left: 20px;
+        }
+
+        .nav-arrow.right {
+            right: 20px;
+        }
+
+        .modal-controls {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .modal-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
+        }
+
+        .modal-controls button:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         @keyframes fadeIn {
@@ -130,137 +234,65 @@
             to { opacity: 1; }
         }
 
-        /* Social Links Modal */
-        .social-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 1100;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 1px solid var(--accent-color);
-        }
-
-        .social-modal.active {
-            display: block;
-            animation: modalIn 0.3s ease;
-        }
-
-        .social-modal h3 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.8em;
-            margin-bottom: 15px;
-            color: var(--accent-color);
-        }
-
-        .social-modal p {
-            margin: 10px 0;
-        }
-
-        .social-modal .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 1.2em;
-        }
-
-        .goto-btn {
-            background: var(--accent-color);
-            color: var(--primary-bg);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.7em;
-            margin-top: 10px;
-        }
-
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -60%);
+        @media (max-width: 768px) {
+            .counter {
+                font-size: 1.8em;
             }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
+            
+            .floating-image {
+                width: 70px;
+                height: 70px;
+            }
+
+            .gallery-container {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .gallery-item img {
+                height: 130px;
+            }
+
+            .nav-arrow {
+                font-size: 1.8rem;
+                padding: 15px;
             }
         }
-
-        /* Rest of your existing gallery and modal styles... */
-        [Previous gallery-container and modal styles remain the same]
-
     </style>
 </head>
 <body>
-    <div class="nav-bar">
-        <button class="social-btn" onclick="showSocialInfo('instagram')">
-            <i class="fab fa-instagram"></i> Instagram
-        </button>
-        <button class="social-btn" onclick="showSocialInfo('facebook')">
-            <i class="fab fa-facebook"></i> Facebook
-        </button>
-        <button class="social-btn" onclick="showSocialInfo('phone')">
-            <i class="fas fa-phone"></i> Contact
-        </button>
-    </div>
+    <button id="theme-toggle">☀️</button>
 
     <div class="header">
         <div class="counter-container">
-            <div class="counter" id="counter">+100</div>
-            <div class="designs-text">Designs</div>
+            <div class="counter" id="counter">0</div>
+            <div class="counter-text" id="counter-text">+ Designs</div>
         </div>
         <div class="floating-images" id="floating-images"></div>
     </div>
 
-    <!-- Social Info Modals -->
-    <div class="social-modal" id="instagramModal">
-        <button class="close-btn" onclick="closeModal('instagramModal')">&times;</button>
-        <h3>Instagram</h3>
-        <p>@khn_clothing</p>
-        <button class="goto-btn" onclick="window.open('https://www.instagram.com/khn_clothing/', '_blank')">
-            Go to Profile
-        </button>
-    </div>
+    <div class="gallery-container" id="gallery"></div>
 
-    <div class="social-modal" id="facebookModal">
-        <button class="close-btn" onclick="closeModal('facebookModal')">&times;</button>
-        <h3>Facebook</h3>
-        <p>KHN Clothing</p>
-        <button class="goto-btn" onclick="window.open('https://www.facebook.com/profile.php?id=61566491134774', '_blank')">
-            Go to Profile
-        </button>
+    <div class="modal" id="modal">
+        <span class="nav-arrow left" id="prev">←</span>
+        <img id="modalImage" src="" alt="Full size image">
+        <span class="nav-arrow right" id="next">→</span>
+        <div class="modal-controls">
+            <button id="download">Download</button>
+            <button id="close">Close</button>
+        </div>
     </div>
-
-    <div class="social-modal" id="phoneModal">
-        <button class="close-btn" onclick="closeModal('phoneModal')">&times;</button>
-        <h3>Contact</h3>
-        <p>0562633460</p>
-        <button class="goto-btn" onclick="window.location.href='tel:0562633460'">
-            Call Now
-        </button>
-    </div>
-
-    <!-- [Previous gallery-container and modal HTML remain the same...] -->
 
     <script>
-        // Social Modal Functions
-        function showSocialInfo(type) {
-            const modalId = type + 'Modal';
-            document.getElementById(modalId).classList.add('active');
-        }
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        let isDark = false;
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.textContent = isDark ? '🌙' : '☀️';
+        });
 
         // Floating Images
         const featuredImages = [4, 7, 11, 14, 23, 109, 135, 47, 93, 99];
@@ -270,20 +302,134 @@
             const img = document.createElement('img');
             img.src = `${num}.png`;
             img.className = 'floating-image';
-            img.style.setProperty('--y', `${Math.random() * 100 - 50}px`);
-            img.style.animationDelay = `${index * -2}s`;
+            img.style.setProperty('--y', `${Math.random() * 200 - 100}px`);
+            img.style.setProperty('--rotate', `${Math.random() * 360}deg`);
+            img.style.animationDelay = `${index * -1.5}s`;
             floatingContainer.appendChild(img);
         });
 
-        // Counter Animation - Simplified
+        // Counter Animation
         const counter = document.getElementById('counter');
-        counter.style.opacity = '0';
-        setTimeout(() => {
-            counter.style.opacity = '1';
-            counter.style.transition = 'opacity 0.5s ease';
-        }, 100);
+        const counterText = document.getElementById('counter-text');
+        let count = 0;
+        
+        function animateCounter() {
+            if (count < 100) {
+                count++;
+                counter.textContent = count;
+                setTimeout(animateCounter, 30);
+            } else {
+                counterText.style.opacity = '1';
+                counterText.classList.add('typing');
+            }
+        }
 
-        // [Previous gallery and modal JavaScript remain the same...]
+        // Start counter animation when in view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        observer.observe(counter);
+
+        // Gallery
+        const gallery = document.getElementById('gallery');
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+        const imageCount = 145;
+        const images = Array.from({ length: imageCount }, (_, i) => `${i + 1}.png`);
+        let currentIndex = 0;
+
+        const createImageElement = (src, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('gallery-item');
+
+            const img = new Image();
+            img.src = src;
+            img.alt = `Image ${index+1}`;
+            img.loading = 'lazy';
+            wrapper.appendChild(img);
+            wrapper.addEventListener('click', () => openModal(index));
+            return wrapper;
+        };
+
+        const fragment = document.createDocumentFragment();
+        images.forEach((src, index) => {
+            fragment.appendChild(createImageElement(src, index));
+        });
+        gallery.appendChild(fragment);
+
+        function openModal(index) {
+            currentIndex = index;
+            modalImage.src = images[index];
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        function navigate(offset) {
+            currentIndex = (currentIndex + offset + images.length) % images.length;
+            modalImage.src = images[currentIndex];
+        }
+
+        document.getElementById('prev').addEventListener('click', () => navigate(-1));
+        document.getElementById('next').addEventListener('click', () => navigate(1));
+        document.getElementById('close').addEventListener('click', closeModal);
+        document.getElementById('download').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = images[currentIndex];
+            link.download = `image_${currentIndex + 1}.png`;
+            link.click();
+        });
+
+        // Keyboard Navigation
+        window.addEventListener('keydown', (e) => {
+            if (modal.classList.contains('active')) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        navigate(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigate(1);
+                        break;
+                    case 'Escape':
+                        closeModal();
+                        break;
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Touch swipe functionality
+        let touchStartX = 0;
+        modalImage.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        modalImage.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    navigate(1);
+                } else {
+                    navigate(-1);
+                }
+            }
+        });
     </script>
 </body>
 </html>
