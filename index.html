@@ -3,282 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery Viewer</title>
+    <title>Dynamic Image Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --gap: 20px;
-            --card-bg: #f7f7f7;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --text-color: #4d4d4d;
-            --hover-color: #333;
+            --background: #ffffff;
+            --text: #333333;
+            --card-bg: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --hover-gradient: linear-gradient(45deg, rgba(135, 206, 235, 0.2), rgba(147, 112, 219, 0.2));
             --modal-bg: rgba(0, 0, 0, 0.9);
-            --nav-color: rgba(255,255,255,0.7);
         }
-        body {
-            font-family: Arial, sans-serif;
+
+        [data-theme="dark"] {
+            --background: #1a1a1a;
+            --text: #ffffff;
+            --card-bg: #2d2d2d;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --hover-gradient: linear-gradient(45deg, rgba(135, 206, 235, 0.1), rgba(147, 112, 219, 0.1));
+            --modal-bg: rgba(0, 0, 0, 0.95);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #e0e0e0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
             min-height: 100vh;
         }
-        .gallery-container {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: var(--gap);
-            flex: 1;
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 10px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
         }
-        .gallery-item {
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .header-slider {
+            height: 300px;
             position: relative;
             overflow: hidden;
-            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .slider-container {
+            display: flex;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s ease;
+        }
+
+        .slider-item {
+            position: relative;
+            margin: 0 10px;
+            transition: all 0.5s ease;
+            transform-origin: center;
+        }
+
+        .slider-item img {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            transition: all 0.5s ease;
+        }
+
+        .gallery-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
             background: var(--card-bg);
-            box-shadow: 0 6px 12px var(--shadow-color);
+            box-shadow: 0 4px 15px var(--shadow);
             cursor: pointer;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-       .gallery-item:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--hover-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .gallery-item:hover::before {
+            opacity: 1;
+        }
+
         .gallery-item img {
             width: 100%;
-            height: 170px;
+            height: 250px;
             object-fit: cover;
+            transition: transform 0.3s ease;
         }
+
+        .counter {
+            text-align: center;
+            font-size: 2rem;
+            margin: 20px 0;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: var(--modal-bg);
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            overflow: hidden;
-            transition: opacity 0.3s ease;
-            opacity: 0;
         }
+
         .modal.active {
             display: flex;
-            opacity: 1;
+            animation: modalFade 0.3s ease;
         }
-         .modal img {
-            max-width: 95%;
-            max-height: 85%;
-            object-fit: contain;
-            animation: fadeIn 0.3s ease-in-out;
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 10px;
         }
-         .modal-controls {
-            position: absolute;
-            bottom: 20px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            width: 100%;
-        }
-        .modal-controls button {
-            background: var(--text-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .modal-controls button:hover {
-            background: var(--hover-color);
-        }
-        .nav-arrow {
+
+        .modal-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 2.5rem;
-            color: var(--nav-color);
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.3s ease;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 50%;
-        }
-        .nav-arrow:hover {
+            font-size: 2rem;
             color: white;
-            background: rgba(0,0,0,0.5);
+            cursor: pointer;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background 0.3s ease;
         }
-        .nav-arrow.left {
-            left: 10px;
+
+        .modal-nav:hover {
+            background: rgba(0, 0, 0, 0.8);
         }
-        .nav-arrow.right {
-            right: 10px;
+
+        .modal-prev {
+            left: 20px;
         }
-        .nav-arrow::before{
-           font-family: 'Font Awesome 6 Free';
-           font-weight: 900;
+
+        .modal-next {
+            right: 20px;
         }
-       .nav-arrow.left::before{
-         content: "\f053";
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
         }
-       .nav-arrow.right::before{
-         content: "\f054";
+
+        @keyframes modalFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        @media (max-width: 600px) {
+
+        @media (max-width: 768px) {
             .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                padding: 10px;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 10px;
+                padding: 10px;
             }
+
             .gallery-item img {
-                height: 130px;
+                height: 150px;
             }
-            .nav-arrow {
-                font-size: 2rem;
+
+            .slider-item img {
+                width: 200px;
+                height: 200px;
             }
-        }
-        .instagram-link {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .instagram-link a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-         .instagram-link a:hover {
-            color: var(--hover-color);
-        }
-        footer{
-          text-align: center;
-          padding: 10px;
-          background-color: var(--card-bg);
-          color: var(--text-color);
+
+            .modal-nav {
+                font-size: 1.5rem;
+                padding: 15px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="gallery-container" id="gallery"></div>
-    
-    <div class="instagram-link">
-        <a href="https://www.instagram.com/khn_clothing/" target="_blank">Follow me on Instagram</a>
+    <button class="theme-toggle" aria-label="Toggle theme">
+        ☀️
+    </button>
+
+    <div class="header-slider">
+        <div class="slider-container" id="sliderContainer"></div>
     </div>
 
+    <div class="counter" id="counter">0</div>
+    
+    <div class="gallery-container" id="gallery"></div>
+
     <div class="modal" id="modal">
-        <span class="nav-arrow left" id="prev"></span>
-        <img id="modalImage" src="" alt="Zoomed Image">
-        <span class="nav-arrow right" id="next"></span>
-        <div class="modal-controls">
-            <button id="download">Download</button>
-            <button id="close">Close</button>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Full size image">
+            <div class="modal-nav modal-prev">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="modal-nav modal-next">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="modal-close">
+                <i class="fas fa-times"></i>
+            </div>
         </div>
     </div>
 
-    <footer>
-       © 2024 Image Gallery
-    </footer>
-
     <script>
-        const galleryContainer = document.getElementById('gallery');
+        const MAX_IMAGES = 300;
+        const INITIAL_VISIBLE_IMAGES = 30;
+        let loadedImages = 0;
+        let currentSlideIndex = 0;
+        
+        const themeToggle = document.querySelector('.theme-toggle');
+        const gallery = document.getElementById('gallery');
+        const counter = document.getElementById('counter');
         const modal = document.getElementById('modal');
         const modalImage = document.getElementById('modalImage');
-        const prevButton = document.getElementById('prev');
-        const nextButton = document.getElementById('next');
-        const closeButton = document.getElementById('close');
-        const downloadButton = document.getElementById('download');
-        const imageCount = 145; // Total number of images
-        const images = Array.from({ length: imageCount }, (_, i) => `${i + 1}.png`); // Pre-create array
-        let currentIndex = 0;
+        const sliderContainer = document.getElementById('sliderContainer');
 
-        const createImageElement = (src, index) => {
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('gallery-item');
+        // Theme switching
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.setAttribute('data-theme',
+                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+            );
+            themeToggle.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        });
 
-            const img = new Image();
-            img.src = src;
-             img.alt = `Image ${index+1}`;
-             img.onerror = () => { 
-                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
-            };
-            wrapper.appendChild(img);
-             wrapper.addEventListener('click', () => openModal(index));
-            return wrapper;
-        };
-
-       const fragment = document.createDocumentFragment();
-        images.forEach((src,index) => {
-          fragment.appendChild(createImageElement(src,index))
-        })
-
-        galleryContainer.appendChild(fragment);
-
-
-        function openModal(index) {
-            currentIndex = index;
-            modalImage.src = images[index];
-            modal.classList.add('active');
-             updateDownloadLink();
+        // Image loading and counter animation
+        function checkImageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
         }
 
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-
-
-        function updateDownloadLink() {
-            downloadButton.onclick = () => {
-                const link = document.createElement('a');
-                link.href = images[currentIndex];
-                link.download = `image_${currentIndex + 1}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-        }
-
-        function navigate(offset) {
-            currentIndex = (currentIndex + offset + images.length) % images.length;
-            modalImage.src = images[currentIndex];
-             updateDownloadLink();
-        }
-
-        prevButton.addEventListener('click', () => navigate(-1));
-        nextButton.addEventListener('click', () => navigate(1));
-        closeButton.addEventListener('click', closeModal);
-
-        window.addEventListener('keydown', (e) => {
-            if (modal.classList.contains('active')) {
-                switch(e.key) {
-                    case 'ArrowLeft':
-                        navigate(-1);
-                        break;
-                    case 'ArrowRight':
-                        navigate(1);
-                        break;
-                    case 'Escape':
-                        closeModal();
-                        break;
+        async function loadImages() {
+            for (let i = 1; i <= MAX_IMAGES; i++) {
+                const exists = await checkImageExists(`${i}.png`);
+                if (exists) {
+                    loadedImages++;
+                    updateCounter(loadedImages);
+                    if (i <= INITIAL_VISIBLE_IMAGES) {
+                        createGalleryItem(i);
+                    }
                 }
             }
-        });
+            initializeSlider();
+        }
+
+        function updateCounter(value) {
+            const duration = value <= 30 ? 1000 :
+                           value <= 88 ? 2000 :
+                           value <= 94 ? 4000 :
+                           value <= 95 ? 6000 : 8000;
+            
+            counter.textContent = value + '+ Designs';
+        }
+
+        function createGalleryItem(index) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            
+            const img = document.createElement('img');
+            img.src = `${index}.png`;
+            img.alt = `Design ${index}`;
+            
+            item.appendChild(img);
+            item.addEventListener('click', () => openModal(index));
+            gallery.appendChild(item);
+        }
+
+        // Slider functionality
+        function initializeSlider() {
+            const slideImages = Array.from({ length: 9 }, (_, i) => i + 1)
+                                   .filter(i => i <= loadedImages);
+            
+            slideImages.forEach((index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slider-item';
+                slide.innerHTML = `<img src="${index}.png" alt="Slide ${index}">`;
+                sliderContainer.appendChild(slide);
+            });
+
+            updateSliderPositions();
+            setInterval(nextSlide, 6000);
+        }
+
+        function updateSliderPositions() {
+            const slides = document.querySelectorAll('.slider-item');
+            slides.forEach((slide, index) => {
+                const offset = index - currentSlideIndex;
+                const scale = Math.abs(offset) <= 1 ? 0.8 : 0.5;
+                const opacity = Math.abs(offset) <= 1 ? 0.7 : 0.4;
+                
+                slide.style.transform = `
+                    translateX(${offset * 320}px)
+                    scale(${offset === 0 ? 1 : scale})
+                `;
+                slide.style.opacity = offset === 0 ? 1 : opacity;
+                slide.style.zIndex = offset === 0 ? 2 : 1;
+            });
+        }
+
+        function nextSlide() {
+            currentSlideIndex = (currentSlideIndex + 1) % sliderContainer.children.length;
+            updateSliderPositions();
+        }
+
+        // Modal functionality
+        function openModal(index) {
+            modalImage.src = `${index}.png`;
+            modal.classList.add('active');
+            currentImageIndex = index;
+        }
 
         modal.addEventListener('click', (e) => {
-             if (e.target === modal) {
-                closeModal();
+            if (e.target === modal) {
+                modal.classList.remove('active');
             }
         });
 
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        document.querySelector('.modal-prev').addEventListener('click', () => {
+            if (currentImageIndex > 1) {
+                openModal(currentImageIndex - 1);
+            }
+        });
+
+        document.querySelector('.modal-next').addEventListener('click', () => {
+            if (currentImageIndex < loadedImages) {
+                openModal(currentImageIndex + 1);
+            }
+        });
+
+        // Touch events for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        modal.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        modal.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchEndX - touchStartX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0 && currentImageIndex > 1) {
+                    openModal(currentImageIndex - 1);
+                } else if (diff < 0 && currentImageIndex < loadedImages) {
+                    openModal(currentImageIndex + 1);
+                }
+            }
+        }
+
+        // Initialize
+        loadImages();
     </script>
 </body>
 </html>
