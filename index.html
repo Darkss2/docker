@@ -3,508 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Image Gallery</title>
-    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@3.4.1/src/css/preflight.css">
+    <title>KHN Clothing Gallery</title>
     <style>
         :root {
-            --primary-bg: #f5f5f5;
-            --secondary-bg: #e0e0e0;
+            --gap: 15px;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --highlight: rgba(135, 206, 235, 0.3);
-            --gradient: linear-gradient(45deg, rgba(135, 206, 235, 0.2), rgba(147, 112, 219, 0.2));
-        }
-
-        [data-theme="dark"] {
-            --primary-bg: #1a1a1a;
-            --secondary-bg: #2d2d2d;
-            --card-bg: #333333;
-            --text-color: #f5f5f5;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --highlight: rgba(135, 206, 235, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --text-color: #2d3436;
+            --primary-color: #74b9ff;
+            --hover-color: #0984e3;
+            --modal-bg: rgba(0, 0, 0, 0.95);
+            --nav-color: #ffffff;
+            --body-bg: #f5f6fa;
+            --header-bg: #ffffff;
+            --header-height: 70px;
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--primary-bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--body-bg);
             color: var(--text-color);
-            min-height: 100vh;
             overflow-x: hidden;
-            padding-top: 60px;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1000;
-            backdrop-filter: blur(8px);
-            color: var(--text-color);
+            min-height: 100vh;
             transition: all 0.3s ease;
         }
 
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .social-buttons {
+        /* Header */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: var(--secondary-bg);
-            padding: 12px 24px;
+            height: var(--header-height);
+            background: var(--header-bg);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
             display: flex;
-            gap: 12px;
-            z-index: 999;
-            box-shadow: 0 2px 10px var(--shadow);
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            z-index: 1001;
         }
 
-        .social-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 10px 16px;
+        .header-button {
+            background: rgba(116, 185, 255, 0.1);
+            border: 2px solid var(--primary-color);
+            padding: 12px 25px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: var(--text-color);
-            transition: all 0.3s ease;
+            gap: 12px;
+            transition: all 0.2s ease;
+            color: var(--primary-color);
+            font-weight: 500;
         }
 
-        .social-button:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .header-button:hover {
+            background: var(--primary-color);
+            color: white;
             transform: translateY(-2px);
         }
 
-        .social-button.active {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        .header-button i {
+            font-size: 1.1rem;
         }
 
-        .social-content {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .social-link {
+        .dropdown-content {
             display: none;
-            font-size: 0.875rem;
-            color: #3b82f6;
-            margin-top: 4px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
+            position: absolute;
+            top: calc(var(--header-height) + 10px);
+            background: var(--header-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            z-index: 1002;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 220px;
         }
 
-        .social-button.active .social-link {
-            display: block;
+        .dropdown-content.active {
+            display: flex;
+            animation: slideDown 0.3s ease;
         }
 
-        .social-link:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .dropdown-content span {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            padding: 8px 12px;
         }
 
-        .header {
-            position: relative;
-            height: 400px;
-            background: var(--secondary-bg);
-            overflow: hidden;
+        .dropdown-content button {
+            background: rgba(116, 185, 255, 0.1);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-content button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: var(--primary-color);
+            border: none;
+            padding: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .counter-container {
-            text-align: center;
-            z-index: 2;
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .counter {
-            font-size: 4rem;
-            font-weight: bold;
-            font-family: monospace;
-            margin-bottom: 1rem;
+        .theme-toggle i {
+            font-size: 1.4rem;
+            transition: transform 0.3s ease;
         }
 
-        .counter-text {
-            font-size: 1.5rem;
-            font-family: monospace;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .floating-images {
-            position: absolute;
-            inset: 0;
-        }
-
-        .floating-image {
-            position: absolute;
-            width: 96px;
-            height: 96px;
-            object-fit: cover;
-            border-radius: 12px;
-            opacity: 0.6;
-            animation: float 15s infinite ease-in-out;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(5deg);
-            }
-        }
-
-        .gallery {
+        /* Gallery */
+        .gallery-container {
             max-width: 1400px;
-            margin: 32px auto;
-            padding: 0 24px;
+            margin: calc(var(--header-height) + 40px) auto 30px;
+            padding: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: var(--gap);
         }
 
         .gallery-item {
-            position: relative;
-            aspect-ratio: 1;
             border-radius: 12px;
             overflow: hidden;
+            background: var(--card-bg);
+            box-shadow: 0 3px 8px var(--shadow-color);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .gallery-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 24px var(--shadow);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .gallery-item img {
             width: 100%;
-            height: 100%;
+            height: 180px;
             object-fit: cover;
-            transition: transform 0.3s ease;
         }
 
+        /* Modal */
         .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
             display: none;
-            place-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-bg);
+            justify-content: center;
+            align-items: center;
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .modal.active {
-            display: grid;
+            display: flex;
+            opacity: 1;
         }
 
-        .modal-image {
+        .modal img {
             max-width: 90%;
-            max-height: 80vh;
+            max-height: 80%;
             object-fit: contain;
             border-radius: 8px;
         }
 
-        .modal-nav {
+        /* Navigation Arrows */
+        .nav-arrow {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 16px;
-            border-radius: 50%;
+            font-size: 3rem;
+            color: var(--primary-color);
             cursor: pointer;
-            color: white;
-            transition: all 0.3s ease;
+            padding: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.9;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .modal-nav:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-50%) scale(1.1);
+        .nav-arrow:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.15);
+            color: var(--hover-color);
         }
 
-        .modal-nav.prev {
-            left: 24px;
-        }
-
-        .modal-nav.next {
-            right: 24px;
-        }
+        .nav-arrow.left { left: 25px; }
+        .nav-arrow.right { right: 25px; }
 
         .modal-controls {
             position: absolute;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 30px;
             display: flex;
-            gap: 16px;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
         }
 
-        .modal-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+        .modal-controls button {
+            background: var(--primary-color);
             color: white;
+            border: none;
+            padding: 12px 25px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            font-size: 1rem;
         }
 
-        .modal-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+        .modal-controls button:hover {
+            background: var(--hover-color);
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --card-bg: #2d3436;
+            --shadow-color: rgba(255, 255, 255, 0.05);
+            --text-color: #dfe6e9;
+            --primary-color: #0984e3;
+            --hover-color: #74b9ff;
+            --body-bg: #1a1e1f;
+            --header-bg: #2d3436;
+            --modal-bg: rgba(0, 0, 0, 0.97);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .gallery-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 16px;
-                padding: 0 16px;
+            .header {
+                gap: 15px;
+                padding: 0 15px;
+                justify-content: flex-start;
             }
 
-            .counter {
-                font-size: 3rem;
+            .header-button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
             }
 
-            .floating-image {
-                width: 72px;
-                height: 72px;
+            .gallery-container {
+                grid-template-columns: repeat(2, 1fr);
+                margin-top: calc(var(--header-height) + 20px);
             }
 
-            .social-buttons {
-                padding: 8px 16px;
+            .gallery-item img {
+                height: 150px;
             }
 
-            .social-button {
+            .nav-arrow {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                height: 60px;
+                gap: 10px;
+            }
+
+            .header-button {
                 padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                padding: 10px;
+            }
+
+            .gallery-container {
+                grid-template-columns: 1fr;
+                padding: 10px;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="social-buttons">
-        <button class="social-button" data-platform="instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect width="20" height="20" x="2" y="2" rx="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-            </svg>
-            <div class="social-content">
-                <span>Instagram</span>
-                <a href="https://www.instagram.com/khn_clothing/" target="_blank" class="social-link">Visit Profile</a>
-            </div>
-        </button>
-
-        <button class="social-button" data-platform="facebook">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-            </svg>
-            <div class="social-content">
-                <span>Facebook</span>
-                <a href="https://www.facebook.com/profile.php?id=61566491134774" target="_blank" class="social-link">Visit Profile</a>
-            </div>
-        </button>
-
-        <button class="social-button" data-platform="phone">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            <div class="social-content">
-                <span>Phone Number</span>
-            </div>
-        </button>
-    </div>
-
-    <button class="theme-toggle">☀️</button>
-
+    <!-- Header -->
     <div class="header">
-        <div class="counter-container">
-            <div class="counter">0</div>
-            <div class="counter-text">+ Designs</div>
+        <div class="header-button" id="instagramButton">
+            <i class="fab fa-instagram"></i>
+            <span>Instagram</span>
         </div>
-        <div class="floating-images"></div>
+        <div class="header-button" id="facebookButton">
+            <i class="fab fa-facebook"></i>
+            <span>Facebook</span>
+        </div>
+        <div class="header-button" id="phoneButton">
+            <i class="fas fa-phone"></i>
+            <span>Contact</span>
+        </div>
+        
+        <!-- Dropdowns -->
+        <div class="dropdown-content" id="instagramDropdown">
+            <span>@khn_clothing</span>
+            <button onclick="window.open('https://www.instagram.com/khn_clothing/', '_blank')">
+                <i class="fas fa-external-link-alt"></i>
+                Visit Profile
+            </button>
+            <button onclick="copyToClipboard('https://www.instagram.com/khn_clothing/')">
+                <i class="fas fa-link"></i>
+                Copy Link
+            </button>
+        </div>
+        <div class="dropdown-content" id="facebookDropdown">
+            <span>KHN Clothing</span>
+            <button onclick="window.open('https://www.facebook.com/profile.php?id=61566491134774', '_blank')">
+                <i class="fas fa-external-link-alt"></i>
+                Visit Page
+            </button>
+            <button onclick="copyToClipboard('https://www.facebook.com/profile.php?id=61566491134774')">
+                <i class="fas fa-link"></i>
+                Copy Link
+            </button>
+        </div>
+        <div class="dropdown-content" id="phoneDropdown">
+            <span>0562633460</span>
+            <button onclick="copyToClipboard('0562633460')">
+                <i class="fas fa-copy"></i>
+                Copy Number
+            </button>
+            <button onclick="window.location.href='tel:0562633460'">
+                <i class="fas fa-phone"></i>
+                Call Now
+            </button>
+        </div>
     </div>
 
-    <div class="gallery"></div>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
 
-    <div class="modal">
-        <button class="modal-nav prev">←</button>
-        <img class="modal-image" src="" alt="">
-        <button class="modal-nav next">→</button>
+    <!-- Gallery -->
+    <div class="gallery-container" id="gallery"></div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <span class="nav-arrow left" id="prev"><i class="fas fa-chevron-left"></i></span>
+        <img id="modalImage" src="" alt="Enlarged View">
+        <span class="nav-arrow right" id="next"><i class="fas fa-chevron-right"></i></span>
         <div class="modal-controls">
-            <button class="modal-button download">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Download
-            </button>
-            <button class="modal-button close">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-                Close
-            </button>
+            <button id="download">Download</button>
+            <button id="close">Close</button>
         </div>
     </div>
 
     <script>
-        // Theme Toggle
-        const themeToggle = document.querySelector('.theme-toggle');
-        let isDark = false;
+        // Header Dropdowns
+        const dropdowns = {
+            instagram: { button: document.getElementById('instagramButton'), dropdown: document.getElementById('instagramDropdown') },
+            facebook: { button: document.getElementById('facebookButton'), dropdown: document.getElementById('facebookDropdown') },
+            phone: { button: document.getElementById('phoneButton'), dropdown: document.getElementById('phoneDropdown') }
+        };
 
-        themeToggle.addEventListener('click', () => {
-            isDark = !isDark;
-            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            themeToggle.textContent = isDark ? '🌙' : '☀️';
-        });
-
-        // Social Buttons
-        const socialButtons = document.querySelectorAll('.social-button');
-        socialButtons.forEach(button => {
+        Object.values(dropdowns).forEach(({ button, dropdown }) => {
             button.addEventListener('click', (e) => {
-                const platform = button.dataset.platform;
-                if (platform === 'phone') {
-                    navigator.clipboard.writeText('0562633460');
-                    const span = button.querySelector('span');
-                    span.textContent = 'Copied!';
-                    setTimeout(() => {
-                        span.textContent = 'Phone Number';
-                    }, 1500);
-                } else {
-                    button.classList.toggle('active');
-                    socialButtons.forEach(otherButton => {
-                        if (otherButton !== button) {
-                            otherButton.classList.remove('active');
-                        }
-                    });
-                }
+                e.stopPropagation();
+                Object.values(dropdowns).forEach(d => d.dropdown !== dropdown && d.dropdown.classList.remove('active'));
+                dropdown.classList.toggle('active');
             });
         });
 
-        // Floating Images
-        const featuredImages = [4, 7, 11, 14, 23, 109, 135, 47, 93, 99];
-        const floatingContainer = document.querySelector('.floating-images');
-
-        featuredImages.forEach((num, index) => {
-            const img = document.createElement('img');
-            img.src = `${num}.png`;
-            img.className = 'floating-image';
-            img.style.animationDelay = `${index * -1.5}s`;
-            img.style.top = `${Math.random() * 100}%`;
-            img.style.left = `${Math.random() * 100}%`;
-            img.style.transform = `rotate(${Math.random() * 360}deg)`;
-            floatingContainer.appendChild(img);
+        document.addEventListener('click', () => {
+            Object.values(dropdowns).forEach(d => d.dropdown.classList.remove('active'));
         });
 
-        // Counter Animation
-        const counter = document.querySelector('.counter');
-        const counterText = document.querySelector('.counter-text');
-        let count = 0;
-
-        function animateCounter() {
-            if (count < 100) {
-                count++;
-                counter.textContent = count;
-                requestAnimationFrame(animateCounter);
-            } else {
-                counterText.style.opacity = '1';
-            }
+        // Copy Functionality
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy', true);
+            });
         }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounter();
-                    observer.unobserve(entry.target);
-                }
-            });
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.padding = '12px 25px';
+            toast.style.background = isError ? '#e74c3c' : '#2ecc71';
+            toast.style.color = 'white';
+            toast.style.borderRadius = '8px';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.2)';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 2000);
+        }
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            themeToggle.innerHTML = isDark 
+                ? '<i class="fas fa-sun"></i>' 
+                : '<i class="fas fa-moon"></i>';
+            
+            themeToggle.classList.add('theme-switch');
+            setTimeout(() => {
+                themeToggle.classList.remove('theme-switch');
+            }, 300);
         });
 
-        observer.observe(counter);
-
-        // Gallery
-        const gallery = document.querySelector('.gallery');
-        const modal = document.querySelector('.modal');
-        const modalImage = document.querySelector('.modal-image');
+        // Gallery Logic
+        const galleryContainer = document.getElementById('gallery');
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
         const imageCount = 145;
+        const images = Array.from({ length: imageCount }, (_, i) => `${i + 1}.png`);
         let currentIndex = 0;
-        const batchSize = 30;
-        let renderedImages = [];
 
-        function createGalleryItem(index) {
+        // Initialize Gallery
+        images.forEach((src, index) => {
             const item = document.createElement('div');
             item.className = 'gallery-item';
-            
-            const img = document.createElement('img');
-            img.src = `${index}.png`;
-            img.alt = `Image ${index}`;
-            img.loading = 'lazy';
-            
-            item.appendChild(img);
+            item.innerHTML = `<img src="${src}" alt="Image ${index + 1}" loading="lazy">`;
             item.addEventListener('click', () => openModal(index));
-            
-            return item;
-        }
-
-        function renderBatch(startIndex) {
-            const fragment = document.createDocumentFragment();
-            for (let i = startIndex; i < Math.min(startIndex + batchSize, imageCount); i++) {
-                if (!renderedImages.includes(i)) {
-                    const item = createGalleryItem(i);
-                    fragment.appendChild(item);
-                    renderedImages.push(i);
-                }
-            }
-            gallery.appendChild(fragment);
-        }
-
-        function handleScroll() {
-            const scrollPosition = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
-            
-            if (scrollPosition + windowHeight > documentHeight - 500) {
-                const lastIndex = Math.max(...renderedImages, 0);
-                if (lastIndex < imageCount) {
-                    renderBatch(lastIndex + 1);
-                }
-            }
-        }
-
-        window.addEventListener('scroll', () => {
-            requestAnimationFrame(handleScroll);
+            galleryContainer.appendChild(item);
         });
 
-        // Modal
+        // Modal Functions
         function openModal(index) {
             currentIndex = index;
-            modalImage.src = `${index}.png`;
+            modalImage.src = images[index];
             modal.classList.add('active');
         }
 
@@ -512,46 +487,31 @@
             modal.classList.remove('active');
         }
 
-        function navigate(direction) {
-            currentIndex = (currentIndex + direction + imageCount) % imageCount;
-            modalImage.src = `${currentIndex}.png`;
+        function navigate(offset) {
+            currentIndex = (currentIndex + offset + images.length) % images.length;
+            modalImage.src = images[currentIndex];
         }
 
-        document.querySelector('.modal-nav.prev').addEventListener('click', () => navigate(-1));
-        document.querySelector('.modal-nav.next').addEventListener('click', () => navigate(1));
-        document.querySelector('.modal-button.close').addEventListener('click', closeModal);
-        document.querySelector('.modal-button.download').addEventListener('click', () => {
+        // Event Listeners
+        document.getElementById('prev').addEventListener('click', () => navigate(-1));
+        document.getElementById('next').addEventListener('click', () => navigate(1));
+        document.getElementById('close').addEventListener('click', closeModal);
+        document.getElementById('download').addEventListener('click', () => {
             const link = document.createElement('a');
-            link.href = `${currentIndex}.png`;
-            link.download = `image_${currentIndex}.png`;
+            link.href = images[currentIndex];
+            link.download = `khn-clothing-${currentIndex + 1}.png`;
+            document.body.appendChild(link); // Append to the body
             link.click();
+            document.body.removeChild(link); // Remove it after
         });
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Keyboard Navigation
         window.addEventListener('keydown', (e) => {
             if (modal.classList.contains('active')) {
-                switch (e.key) {
-                    case 'ArrowLeft':
-                        navigate(-1);
-                        break;
-                    case 'ArrowRight':
-                        navigate(1);
-                        break;
-                    case 'Escape':
-                        closeModal();
-                        break;
-                }
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowLeft') navigate(-1);
+                if (e.key === 'ArrowRight') navigate(1);
             }
         });
-
-        // Initial Load
-        renderBatch(0);
     </script>
 </body>
 </html>
