@@ -3,54 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery Viewer</title>
+    <title>Enhanced Image Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gap: 20px;
-            --card-bg: #f7f7f7;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --text-color: #4d4d4d;
-            --hover-color: #333;
-            --modal-bg: rgba(0, 0, 0, 0.9);
-            --nav-color: rgba(255,255,255,0.7);
+            --primary-bg: #f5f5f5;
+            --secondary-bg: #e0e0e0;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --highlight: rgba(135, 206, 235, 0.3);
+            --gradient: linear-gradient(45deg, rgba(135, 206, 235, 0.2), rgba(147, 112, 219, 0.2));
         }
-        body {
-            font-family: Arial, sans-serif;
+
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #2d2d2d;
+            --card-bg: #333333;
+            --text-color: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --highlight: rgba(135, 206, 235, 0.1);
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #e0e0e0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Theme Toggle */
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            color: var(--text-color);
+        }
+
+        /* Header with Counter and Floating Images */
+        .header {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            background: var(--secondary-bg);
+        }
+
+        .counter-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+        }
+
+        .counter {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .counter-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1em;
+            opacity: 0;
+        }
+
+        .typing {
+            animation: typing 3s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        .floating-images {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-image {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            animation: float 15s infinite linear;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateX(-100%) translateY(var(--y)) rotate(var(--rotate));
+            }
+            100% {
+                transform: translateX(100vw) translateY(var(--y)) rotate(var(--rotate));
+            }
+        }
+
+        /* Main Gallery */
         .gallery-container {
             max-width: 1400px;
             margin: 20px auto;
             padding: 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: var(--gap);
-            flex: 1;
+            gap: 20px;
         }
+
         .gallery-item {
             position: relative;
             overflow: hidden;
             border-radius: 12px;
             background: var(--card-bg);
-            box-shadow: 0 6px 12px var(--shadow-color);
+            box-shadow: 0 6px 12px var(--shadow);
             cursor: pointer;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-       .gallery-item:hover {
-            transform: scale(1.02);
+
+        .gallery-item:hover {
+            transform: scale(1.05);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            background: var(--gradient);
         }
+
         .gallery-item img {
             width: 100%;
             height: 170px;
             object-fit: cover;
+            transition: transform 0.3s ease;
         }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -58,29 +161,50 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--modal-bg);
-            justify-content: center;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
-            overflow: hidden;
-            transition: opacity 0.3s ease;
-            opacity: 0;
         }
+
         .modal.active {
             display: flex;
-            opacity: 1;
+            justify-content: center;
+            align-items: center;
         }
-         .modal img {
+
+        .modal img {
             max-width: 95%;
             max-height: 85%;
             object-fit: contain;
             animation: fadeIn 0.3s ease-in-out;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
         }
-         .modal-controls {
+
+        .nav-arrow:hover {
+            background: rgba(0,0,0,0.5);
+            color: white;
+        }
+
+        .nav-arrow.left {
+            left: 20px;
+        }
+
+        .nav-arrow.right {
+            right: 20px;
+        }
+
+        .modal-controls {
             position: absolute;
             bottom: 20px;
             display: flex;
@@ -88,117 +212,136 @@
             justify-content: center;
             width: 100%;
         }
+
         .modal-controls button {
-            background: var(--text-color);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             cursor: pointer;
             border-radius: 5px;
             transition: background 0.3s ease;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8em;
         }
+
         .modal-controls button:hover {
-            background: var(--hover-color);
+            background: rgba(255, 255, 255, 0.3);
         }
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 2.5rem;
-            color: var(--nav-color);
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.3s ease;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 50%;
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        .nav-arrow:hover {
-            color: white;
-            background: rgba(0,0,0,0.5);
-        }
-        .nav-arrow.left {
-            left: 10px;
-        }
-        .nav-arrow.right {
-            right: 10px;
-        }
-        .nav-arrow::before{
-           font-family: 'Font Awesome 6 Free';
-           font-weight: 900;
-        }
-       .nav-arrow.left::before{
-         content: "\f053";
-        }
-       .nav-arrow.right::before{
-         content: "\f054";
-        }
-        @media (max-width: 600px) {
+
+        @media (max-width: 768px) {
+            .counter {
+                font-size: 1.8em;
+            }
+            
+            .floating-image {
+                width: 70px;
+                height: 70px;
+            }
+
             .gallery-container {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                padding: 10px;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 10px;
             }
+
             .gallery-item img {
                 height: 130px;
             }
+
             .nav-arrow {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                padding: 15px;
             }
         }
-        .instagram-link {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .instagram-link a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-         .instagram-link a:hover {
-            color: var(--hover-color);
-        }
-        footer{
-          text-align: center;
-          padding: 10px;
-          background-color: var(--card-bg);
-          color: var(--text-color);
-        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="gallery-container" id="gallery"></div>
-    
-    <div class="instagram-link">
-        <a href="https://www.instagram.com/khn_clothing/" target="_blank">Follow me on Instagram</a>
+    <button id="theme-toggle">☀️</button>
+
+    <div class="header">
+        <div class="counter-container">
+            <div class="counter" id="counter">0</div>
+            <div class="counter-text" id="counter-text">+ Designs</div>
+        </div>
+        <div class="floating-images" id="floating-images"></div>
     </div>
 
+    <div class="gallery-container" id="gallery"></div>
+
     <div class="modal" id="modal">
-        <span class="nav-arrow left" id="prev"></span>
-        <img id="modalImage" src="" alt="Zoomed Image">
-        <span class="nav-arrow right" id="next"></span>
+        <span class="nav-arrow left" id="prev">←</span>
+        <img id="modalImage" src="" alt="Full size image">
+        <span class="nav-arrow right" id="next">→</span>
         <div class="modal-controls">
             <button id="download">Download</button>
             <button id="close">Close</button>
         </div>
     </div>
 
-    <footer>
-       © 2024 Image Gallery
-    </footer>
-
     <script>
-        const galleryContainer = document.getElementById('gallery');
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        let isDark = false;
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.textContent = isDark ? '🌙' : '☀️';
+        });
+
+        // Floating Images
+        const featuredImages = [4, 7, 11, 14, 23, 109, 135, 47, 93, 99];
+        const floatingContainer = document.getElementById('floating-images');
+
+        featuredImages.forEach((num, index) => {
+            const img = document.createElement('img');
+            img.src = `${num}.png`;
+            img.className = 'floating-image';
+            img.style.setProperty('--y', `${Math.random() * 200 - 100}px`);
+            img.style.setProperty('--rotate', `${Math.random() * 360}deg`);
+            img.style.animationDelay = `${index * -1.5}s`;
+            floatingContainer.appendChild(img);
+        });
+
+        // Counter Animation
+        const counter = document.getElementById('counter');
+        const counterText = document.getElementById('counter-text');
+        let count = 0;
+        
+        function animateCounter() {
+            if (count < 100) {
+                count++;
+                counter.textContent = count;
+                setTimeout(animateCounter, 30);
+            } else {
+                counterText.style.opacity = '1';
+                counterText.classList.add('typing');
+            }
+        }
+
+        // Start counter animation when in view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        observer.observe(counter);
+
+        // Gallery
+        const gallery = document.getElementById('gallery');
         const modal = document.getElementById('modal');
         const modalImage = document.getElementById('modalImage');
-        const prevButton = document.getElementById('prev');
-        const nextButton = document.getElementById('next');
-        const closeButton = document.getElementById('close');
-        const downloadButton = document.getElementById('download');
-        const imageCount = 145; // Total number of images
-        const images = Array.from({ length: imageCount }, (_, i) => `${i + 1}.png`); // Pre-create array
+        const imageCount = 145;
+        const images = Array.from({ length: imageCount }, (_, i) => `${i + 1}.png`);
         let currentIndex = 0;
 
         const createImageElement = (src, index) => {
@@ -207,56 +350,45 @@
 
             const img = new Image();
             img.src = src;
-             img.alt = `Image ${index+1}`;
-             img.onerror = () => { 
-                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; 
-            };
+            img.alt = `Image ${index+1}`;
+            img.loading = 'lazy';
             wrapper.appendChild(img);
-             wrapper.addEventListener('click', () => openModal(index));
+            wrapper.addEventListener('click', () => openModal(index));
             return wrapper;
         };
 
-       const fragment = document.createDocumentFragment();
-        images.forEach((src,index) => {
-          fragment.appendChild(createImageElement(src,index))
-        })
-
-        galleryContainer.appendChild(fragment);
-
+        const fragment = document.createDocumentFragment();
+        images.forEach((src, index) => {
+            fragment.appendChild(createImageElement(src, index));
+        });
+        gallery.appendChild(fragment);
 
         function openModal(index) {
             currentIndex = index;
             modalImage.src = images[index];
             modal.classList.add('active');
-             updateDownloadLink();
         }
 
         function closeModal() {
             modal.classList.remove('active');
         }
 
-
-        function updateDownloadLink() {
-            downloadButton.onclick = () => {
-                const link = document.createElement('a');
-                link.href = images[currentIndex];
-                link.download = `image_${currentIndex + 1}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-        }
-
         function navigate(offset) {
             currentIndex = (currentIndex + offset + images.length) % images.length;
             modalImage.src = images[currentIndex];
-             updateDownloadLink();
         }
 
-        prevButton.addEventListener('click', () => navigate(-1));
-        nextButton.addEventListener('click', () => navigate(1));
-        closeButton.addEventListener('click', closeModal);
+        document.getElementById('prev').addEventListener('click', () => navigate(-1));
+        document.getElementById('next').addEventListener('click', () => navigate(1));
+        document.getElementById('close').addEventListener('click', closeModal);
+        document.getElementById('download').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = images[currentIndex];
+            link.download = `image_${currentIndex + 1}.png`;
+            link.click();
+        });
 
+        // Keyboard Navigation
         window.addEventListener('keydown', (e) => {
             if (modal.classList.contains('active')) {
                 switch(e.key) {
@@ -273,12 +405,31 @@
             }
         });
 
+        // Close modal when clicking outside
         modal.addEventListener('click', (e) => {
-             if (e.target === modal) {
+            if (e.target === modal) {
                 closeModal();
             }
         });
 
+        // Touch swipe functionality
+        let touchStartX = 0;
+        modalImage.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        modalImage.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    navigate(1);
+                } else {
+                    navigate(-1);
+                }
+            }
+        });
     </script>
 </body>
 </html>
